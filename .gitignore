@@ -4,6 +4,7 @@
 .env.*
 !.env.example
 *.zip
+/dist/
 __pycache__/
 .codex/
 # Local screenshots are not part of the extension.

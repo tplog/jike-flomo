@@ -28,7 +28,7 @@
 
 ## 安装
 
-1. 下载本仓库并解压，或运行 `git clone https://github.com/xiaotianhu/jike-flomo.git`。
+1. 前往 [Releases](https://github.com/xiaotianhu/jike-flomo/releases/latest) 下载最新的 `jike-flomo-v*.zip` 安装包并解压；也可以下载本仓库源码。
 2. 打开 Chrome 的 `chrome://extensions`，开启「开发者模式」。
 3. 点击「加载已解压的扩展程序」，选择 **`jike-flomo-ext` 文件夹**。
 4. 打开并登录 [即刻网页版](https://web.okjike.com/)，等待首次初始化完成。
