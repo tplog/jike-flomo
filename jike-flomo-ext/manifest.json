@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Jike → Flomo",
+  "version": "0.3.0",
+  "description": "把即刻网页版改造成 flomo 风格：左侧统计+热力图，右侧输入框+笔记流",
+  "permissions": [
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://web.okjike.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Jike → Flomo：已开启，点击关闭",
+    "default_icon": {
+      "16": "icons/on-16.png",
+      "32": "icons/on-32.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://web.okjike.com/*"
+      ],
+      "js": [
+        "bootstrap.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/on-16.png",
+    "32": "icons/on-32.png",
+    "48": "icons/on-48.png",
+    "128": "icons/on-128.png"
+  }
+}

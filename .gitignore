@@ -1,0 +1,10 @@
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+*.zip
+__pycache__/
+.codex/
+# Local screenshots are not part of the extension.
+/rebuilding.jpg

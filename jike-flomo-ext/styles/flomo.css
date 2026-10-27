@@ -1,0 +1,527 @@
+/* ============ Jike → Flomo 精确皮肤 ============
+ * 从 v.flomoapp.com 量的真实值：
+ * bg #fafafa · green #30cf79 · sidebar 312px · main 640px
+ * font BarlowF/PingFang SC · 用户名 20/600 · statNum 26/600 #949494
+ * heatDay 16×16 r3 gap≈6.7 · memo卡 #fff r12 p16 无阴影 · 列表 gap 10
+ * memo 时间 15 #949494 · 正文 15 rgb(50,50,50) lh27
+ */
+
+:root {
+  --jf-bg: #fafafa;
+  --jf-card: #ffffff;
+  --jf-green: #30cf79;
+  --jf-green-1: #d3ecdd;
+  --jf-green-2: #9ddfbc;
+  --jf-green-3: #5fd396;
+  --jf-green-4: #30cf79;
+  --jf-empty: #efefef;
+  --jf-text: rgb(50, 50, 50);
+  --jf-text-2: rgb(148, 148, 148);
+  --jf-text-3: rgb(180, 180, 180);
+  --jf-radius: 12px;
+  --jf-sidebar-w: 312px;
+  --jf-main-w: 640px;
+  --jf-gap: 60px;                 /* sidebar 和主区间距 */
+  --jf-font: BarlowF, "PingFang SC", "Microsoft YaHei", Helvetica, Arial, sans-serif;
+  /* 13 周铺满 288px 内容区；格子 16px，间距约 6.7px。 */
+  --jf-heat-cell: 16px;
+  --jf-heat-gap: calc((288px - 13 * var(--jf-heat-cell)) / 12);
+}
+
+/* ---- 全局 ---- */
+html.jf-on, html.jf-on body { background: var(--jf-bg) !important; }
+html.jf-on body {
+  color: var(--jf-text);
+  font-family: var(--jf-font);
+  font-size: 15px;
+}
+
+/* ---- 即刻原元素隐藏 ---- */
+html.jf-on [class*=_root_1nh1q_1][class*=_wrapper_],   /* What's New banner */
+html.jf-on [class*=_mobileCreateButtonWrapper],
+html.jf-on [class*=_mobileTabBarShell],
+html.jf-on [class*=_desktopStack],                   /* 原 icon 导航 */
+/* /me 个人页的 profile header 整块——由 JS 替换为紧凑条，这里先藏 */
+html.jf-on body[data-jf-route="me"] [class*=_section_nob1h] {
+  display: none !important;
+}
+
+/* ---- 布局：整体居中、两侧留白 ---- */
+.jf-layout {
+  display: flex !important;
+  gap: var(--jf-gap);
+  width: 100%;
+  min-width: 0 !important;
+  max-width: calc(var(--jf-sidebar-w) + var(--jf-main-w) + var(--jf-gap) + 64px);
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 32px 32px 0;
+}
+.jf-layout > [class*=_mainContainer] {
+  flex: 0 0 var(--jf-main-w);
+  max-width: var(--jf-main-w);
+  padding: 0 0 80px;
+  margin: 0 !important;
+  min-width: 0;
+  box-sizing: border-box;
+}
+html.jf-on .mantine-Container-root,
+html.jf-on [class*=mantine-Container] {
+  max-width: none !important;
+  padding: 0 !important;
+}
+
+html.jf-on .jf-layout > [class*=_mainContainer] [class*=mantine-Container] {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+/* ============ 左侧 flomo 面板 ============ */
+#jf-sidebar {
+  width: var(--jf-sidebar-w);
+  flex: 0 0 var(--jf-sidebar-w);
+  padding: 0 12px;
+  box-sizing: border-box;
+  position: sticky;
+  top: 24px;
+  align-self: flex-start;
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+}
+#jf-sidebar .jf-user {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 24px;
+}
+#jf-sidebar .jf-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  flex: 0 0 44px; object-fit: cover;
+}
+#jf-sidebar .jf-userinfo { min-width: 0; flex: 1; }
+#jf-sidebar .jf-username {
+  font-size: 20px; font-weight: 600; line-height: 24px;
+  color: rgb(18,18,18);
+}
+#jf-sidebar .jf-bio {
+  font-size: 13px; color: var(--jf-text-2); line-height: 18px;
+  margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* 三统计 */
+#jf-sidebar .jf-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  padding: 0; margin-bottom: 4px;
+}
+#jf-sidebar .jf-stat { }
+#jf-sidebar .jf-num {
+  font-size: 26px; font-weight: 600; line-height: 27px;
+  color: var(--jf-text-2);
+}
+#jf-sidebar .jf-label {
+  font-size: 15px; font-weight: 500; color: var(--jf-text-2);
+  margin-top: 8px; line-height: 16px;
+}
+
+/* 热力图：flomo 格子偏大、占满侧栏 */
+#jf-sidebar .jf-heatgrid { margin: 16px 0 24px; padding: 0; }
+#jf-sidebar .jf-weeks { display: grid; grid-template-columns: repeat(13, var(--jf-heat-cell)); gap: var(--jf-heat-gap); }
+#jf-sidebar .jf-week { display: flex; flex-direction: column; gap: var(--jf-heat-gap); }
+#jf-sidebar .jf-day {
+  width: var(--jf-heat-cell); height: var(--jf-heat-cell);
+  border-radius: 3px;
+  background: var(--jf-empty);
+}
+#jf-sidebar .jf-day[data-level="1"] { background: var(--jf-green-1); }
+#jf-sidebar .jf-day[data-level="2"] { background: var(--jf-green-2); }
+#jf-sidebar .jf-day[data-level="3"] { background: var(--jf-green-3); }
+#jf-sidebar .jf-day[data-level="4"] { background: var(--jf-green-4); }
+#jf-sidebar .jf-day[data-level="future"] { background: transparent; }
+#jf-sidebar .jf-day[data-today="true"][data-level="0"] { box-shadow: inset 0 0 0 1px #c9c9c9; }
+#jf-sidebar .jf-months {
+  display: grid; grid-template-columns: repeat(13, var(--jf-heat-cell));
+  column-gap: var(--jf-heat-gap); height: 18px; margin-top: 6px;
+}
+#jf-sidebar .jf-months span {
+  font-size: 13px; color: var(--jf-text-2); white-space: nowrap;
+  grid-row: 1; width: max-content;
+}
+
+/* 导航 */
+#jf-sidebar .jf-nav { margin-top: 8px; padding: 0 2px; }
+#jf-sidebar .jf-nav-item {
+  display: flex; align-items: center; gap: 10px;
+  height: 36px; padding: 0 0 0 10px;
+  border-radius: 8px;
+  color: var(--jf-text); text-decoration: none;
+  font-size: 15px; line-height: 20px;
+}
+#jf-sidebar .jf-nav-item svg {
+  width: 18px; height: 18px; flex: 0 0 18px;
+  color: var(--jf-text-2);
+}
+#jf-sidebar .jf-nav-item:hover { background: #f0f0f0; }
+#jf-sidebar .jf-nav-item.active {
+  background: var(--jf-green);
+  color: #fff;
+}
+#jf-sidebar .jf-nav-item.active svg { color: #fff; }
+
+/* 圈子的分组标题 */
+#jf-sidebar .jf-tags { margin-top: 24px; padding: 0 2px; }
+#jf-sidebar .jf-tags-title {
+  font-size: 13px; color: var(--jf-text-2);
+  padding: 0 10px; margin-bottom: 4px;
+}
+#jf-sidebar #jf-topic-list { list-style: none; padding: 0; margin: 0; }
+#jf-sidebar .jf-tag {
+  display: flex; align-items: center;
+  height: 36px; padding: 0 10px;
+  font-size: 15px; color: var(--jf-text);
+  border-radius: 8px; cursor: pointer;
+}
+#jf-sidebar .jf-tag:hover { background: #f0f0f0; }
+#jf-sidebar .jf-tag::before {
+  content: '#';
+  color: var(--jf-text-3); font-weight: 400;
+  margin-right: 6px;
+}
+
+/* ============ flomo 输入框 + profile 紧凑条 ============ */
+/* 即刻 ScrollArea 滚整个主区——topwrap 必须 fixed 才能钉住 */
+#jf-topwrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--jf-bg);
+  padding: 16px 0 10px;
+  pointer-events: none;
+}
+#jf-topwrap > * { pointer-events: auto; }
+/* 主区左缘/宽度由 JS 每 tick 读取 mainContainer 的 rect */
+#jf-topwrap {
+  left: var(--jf-main-left, 50%);
+  right: auto;
+  width: var(--jf-main-w-real, var(--jf-main-w));
+}
+/* /following 页：即刻原生发帖框和 stories 轮播——视觉上藏，但不能 display:none
+   （display:none 会让 Lexical 编辑器失焦无法输入）。用 visibility+position 移除出视图。 */
+html.jf-on body[data-jf-route="following"] [class*=_postForm],
+html.jf-on body[data-jf-route="following"] section[class*=_root_1mtxv],
+html.jf-on body[data-jf-route="following"] [class*=_viewport_1mtxv],
+html.jf-on body[data-jf-route="following"] [class*=_scrollButton] {
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+/* 占位变量属于当前主列；下限兜底，避免旧版或异常回调让首帖被固定输入框遮住。 */
+html.jf-on body[data-jf-route="me"] [class*=_mainContainer],
+html.jf-on body[data-jf-route="following"] [class*=_mainContainer] {
+  padding-top: max(154px, var(--jf-composer-space, 154px)) !important;
+  overflow-anchor: none;
+}
+/* 原生个人页导航及上移量会留下额外空白，由新布局统一接管。 */
+html.jf-on body[data-jf-route="me"] [class*=_navBar_1jlaz] { display: none !important; }
+html.jf-on body[data-jf-route="me"] [style*="user-profile-content-offset-y"] {
+  transform: none !important;
+}
+
+/* ============ flomo 输入框（完整版） ============ */
+#jf-composer {
+  background: var(--jf-card);
+  border-radius: 20px;
+  --jf-composer-height: 160px;
+  box-sizing: border-box;
+  height: var(--jf-composer-height);
+  display: flex; flex-direction: column;
+  padding: 20px 20px 0;
+  margin-bottom: 0;
+  border: 1.5px solid transparent;
+  transition: height .24s ease, border-color .15s, box-shadow .15s;
+}
+#jf-composer.jf-focus, #jf-composer.jf-has-images {
+  height: calc(var(--jf-composer-height) * 2);
+}
+#jf-composer.jf-focus {
+  box-shadow: 0 3px 12px rgb(0 0 0 / 5%);
+  border-color: var(--jf-green);   /* flomo 聚焦绿边 */
+}
+#jf-composer .jf-composer-input {
+  flex: 1; min-height: 0; overflow-y: auto;
+  font-size: 15px; line-height: 1.7;
+  color: var(--jf-text);
+  outline: none;
+  white-space: pre-wrap; word-break: break-word;
+}
+#jf-composer .jf-composer-input:empty::before {
+  content: attr(data-placeholder);
+  color: var(--jf-text-3);
+}
+#jf-composer .jf-composer-input img { display: none; }
+#jf-composer .jf-file-input { display: none !important; }
+#jf-composer .jf-attachments {
+  display: flex; gap: 12px; flex: 0 0 auto;
+  overflow-x: auto; padding: 4px 0; margin-top: 12px;
+}
+#jf-composer .jf-attachments[hidden],
+#jf-composer .jf-composer-status[hidden] { display: none; }
+#jf-composer .jf-image-item, #jf-composer .jf-image-add {
+  position: relative; width: 96px; height: 96px; flex: 0 0 96px;
+  box-sizing: border-box; border-radius: 12px;
+}
+#jf-composer .jf-image-item img {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+  border: 1px solid #e8e8e8; border-radius: inherit; box-sizing: border-box;
+}
+#jf-composer .jf-image-remove {
+  position: absolute; top: 4px; right: 4px; padding: 0;
+  width: 22px; height: 22px; border: none; border-radius: 50%;
+  color: white; background: rgb(0 0 0 / 65%); font: 20px/20px var(--jf-font); cursor: pointer;
+}
+#jf-composer .jf-image-add {
+  display: grid; place-items: center; border: 1px dashed #ccc;
+  background: transparent; color: var(--jf-text-2); font: 36px/1 var(--jf-font); cursor: pointer;
+}
+#jf-composer .jf-image-add:hover { color: var(--jf-green); border-color: var(--jf-green); }
+#jf-composer .jf-image-remove:focus-visible, #jf-composer .jf-image-add:focus-visible {
+  outline: 2px solid var(--jf-green); outline-offset: 2px;
+}
+#jf-composer .jf-composer-status { flex: 0 0 auto; font-size: 12px; line-height: 18px; color: var(--jf-text-2); margin-top: 4px; }
+/* 底栏：icon + 字数 + 发送 */
+#jf-composer .jf-composer-bar {
+  display: flex; align-items: center;
+  height: 48px; flex: 0 0 48px;
+  margin-top: 8px;
+  border-top: 1px solid #f0f0f0;
+}
+#jf-composer .jf-composer-icons {
+  display: flex; align-items: center; gap: 4px; flex: 1;
+}
+#jf-composer .jf-icon {
+  width: 32px; height: 32px;
+  border: none; background: none; cursor: pointer;
+  color: var(--jf-text-2); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+}
+#jf-composer .jf-icon:hover { background: #f0f0f0; color: var(--jf-text); }
+#jf-composer .jf-icon svg { width: 18px; height: 18px; }
+#jf-composer .jf-divider {
+  width: 1px; height: 16px; background: #e8e8e8; margin: 0 6px;
+}
+#jf-composer .jf-composer-right {
+  display: flex; align-items: center; gap: 12px;
+}
+#jf-composer .jf-count {
+  font-size: 13px; color: var(--jf-text-3); min-width: 20px; text-align: right;
+}
+#jf-composer .jf-composer-send {
+  width: 32px; height: 32px; border: none; border-radius: 10px;
+  background: var(--jf-green); color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+#jf-composer .jf-composer-send:disabled { opacity: .4; }
+#jf-composer .jf-composer-send svg { width: 16px; height: 16px; }
+
+/* ============ 帖子 → flomo memo ============ */
+html.jf-on [class*=_post_] {
+  background: var(--jf-card) !important;
+  border-radius: var(--jf-radius) !important;
+  padding: 16px !important;
+  margin-bottom: 10px !important;
+  box-shadow: none !important;
+}
+html.jf-on [class*=_post_] [class*=_root_1mslw] {
+  background: transparent !important;
+  padding: 0 !important;
+}
+html.jf-on [class*=_post_] [class*=_leftSection] { display: none !important; }
+html.jf-on [class*=_post_] [class*=_content_1mslw],
+html.jf-on [class*=_post_] [class*=_container_1mslw] {
+  padding: 0 !important; margin: 0 !important;
+}
+/* 时间行 */
+html.jf-on [class*=_post_] [class*=_header_] { margin: 0 0 10px !important; }
+/* 只藏作者名（里层 _titleContainer_1mslw_53 才是名字），desc（时间）留着 */
+html.jf-on [class*=_post_] [class*=_titleContainer_1mslw] { display: none !important; }
+html.jf-on [class*=_post_] [class*=_title_go2me] { display: contents; }
+/* desc 容器——精确匹配，别把正文也染灰 */
+html.jf-on [class*=_post_] [class*=_header_] [class*=_descContainer],
+html.jf-on [class*=_post_] [class*=_header_] [class*=_desc_go2me] {
+  font-size: 15px !important;
+  color: var(--jf-text-2) !important;
+  line-height: 20px !important;
+}
+/* 正文黑回来——_desc_ 前缀可能误伤 */
+html.jf-on [class*=_post_] [class*=_contentWrapper] [class*=_content_],
+html.jf-on [class*=_post_] [class*=_contentWrapper] [class*=_content_] *,
+html.jf-on [class*=_post_] [class*=_contentWrapper] p {
+  color: var(--jf-text) !important;
+}
+/* 正文 */
+html.jf-on [class*=_post_] [class*=_contentWrapper] {
+  font-size: 15px;
+  line-height: 27px;
+  color: var(--jf-text);
+}
+html.jf-on [class*=_post_] [class*=_content_93yof],
+html.jf-on [class*=_post_] [class*=_content_93yof] *,
+html.jf-on [class*=_post_] [class*=_contentWrapper] p,
+html.jf-on [class*=_post_] [class*=_contentWrapper] div[class*=_content] {
+  font-size: 15px !important;
+  line-height: 27px !important;
+  color: var(--jf-text) !important;
+}
+/* 圈子 tag：沿用原位置，参考 flomo 的浅蓝底、蓝字圆角标签。 */
+html.jf-on [class*=_post_] a[href^="/topic/"]:any-link {
+  display: inline-flex; align-items: center; gap: 3px;
+  max-width: 100%; box-sizing: border-box; vertical-align: middle;
+  background: #eef2ff !important; border: none !important;
+  border-radius: 8px !important;
+  color: #5c7fff !important; font-size: 15px !important;
+  line-height: 22px !important; font-weight: 400; text-decoration: none;
+  padding: 2px 7px !important;
+  transition: background-color .15s;
+}
+/* 提升到正文颜色覆写的同等优先级，保证内层文字也使用标签色。 */
+html.jf-on [class*=_post_] a[href^="/topic/"]:any-link * {
+  color: inherit !important;
+}
+html.jf-on [class*=_post_] a[href^="/topic/"]:any-link:hover { background: #e5ebff !important; }
+html.jf-on [class*=_post_] a[href^="/topic/"]:any-link:focus-visible {
+  outline: 2px solid #5c7fff; outline-offset: 2px;
+}
+html.jf-on [class*=_post_] a[href^="/topic/"]:any-link svg { display: none !important; }
+html.jf-on [class*=_post_] a[href^="/topic/"]:any-link::before { content: '#'; flex: 0 0 auto; }
+
+/* 图片 */
+html.jf-on [class*=_post_] img { border-radius: 8px; }
+
+/* 操作栏：hover 显示、无数字 */
+html.jf-on [class*=_post_] [class*=_actions] {
+  opacity: 0; transition: opacity .15s;
+  margin-top: 12px;
+}
+html.jf-on [class*=_post_]:hover [class*=_actions] { opacity: 1; }
+html.jf-on [class*=_post_] [class*=_actions] button {
+  color: var(--jf-text-2) !important;
+  font-size: 0 !important;
+}
+html.jf-on [class*=_post_] [class*=_actions] button svg {
+  width: 18px; height: 18px;
+}
+html.jf-on [class*=_post_] [class*=_actions] button *:not(svg) { font-size: 0 !important; }
+
+/* 引用/转帖块压平成 flomo 式：浅灰底、小字、去头像署名 */
+html.jf-on [class*=_post_] [class*=_contentWrapper] > div:not(:first-child) {
+  background: #f5f5f5 !important;
+  border-radius: 8px !important;
+  padding: 10px 12px !important;
+  border: none !important;
+}
+html.jf-on [class*=_post_] [class*=_contentWrapper] > div:not(:first-child) * {
+  font-size: 14px !important;
+  line-height: 22px !important;
+}
+html.jf-on [class*=_post_] [class*=_contentWrapper] [class*=_avatar],
+html.jf-on [class*=_post_] [class*=_contentWrapper] [class*=jk-avatar],
+html.jf-on [class*=_post_] [class*=_contentWrapper] [class*=_title],
+html.jf-on [class*=_post_] [class*=_contentWrapper] [class*=_screenName] {
+  display: none !important;
+}
+
+/* ============ /me profile 紧凑条（JS 注入） ============ */
+#jf-profile {
+  background: var(--jf-card);
+  border-radius: 0 0 var(--jf-radius) var(--jf-radius);
+  padding: 12px 16px;
+  margin-bottom: 0;
+  display: flex; align-items: center; gap: 12px;
+}
+#jf-profile:empty { display: none; }
+#jf-profile img {
+  width: 36px; height: 36px; border-radius: 50%;
+}
+#jf-profile .jf-profile-info { flex: 1; min-width: 0; }
+#jf-profile .jf-profile-name {
+  font-size: 15px; font-weight: 600; color: rgb(18,18,18);
+}
+#jf-profile .jf-profile-stats {
+  font-size: 13px; color: var(--jf-text-2); margin-top: 2px;
+}
+#jf-profile .jf-profile-bio {
+  font-size: 13px; color: var(--jf-text-2); margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* /me 顶部 tabs（动态/相册/收藏/我的圈子）——flomo 没有这层，整个隐藏 */
+html.jf-on body[data-jf-route="me"] [class*=mantine-Tabs-root],
+html.jf-on body[data-jf-route="me"] [class*=_list_16srg] {
+  display: none !important;
+}
+
+/* scroll area 背景 */
+html.jf-on [class*=mantine-ScrollArea-root] { background: var(--jf-bg); }
+
+@media (prefers-reduced-motion: reduce) {
+  #jf-composer { transition: none; }
+}
+
+/* ============ 数据菜单与初始化 ============ */
+#jf-sidebar .jf-profile-row { display: flex; align-items: flex-start; gap: 4px; margin-bottom: 24px; }
+#jf-sidebar .jf-user { flex: 1; min-width: 0; margin-bottom: 0; }
+#jf-sidebar .jf-data-menu { position: relative; flex: 0 0 32px; }
+#jf-sidebar .jf-data-trigger {
+  width: 32px; height: 32px; display: grid; place-items: center; padding: 0;
+  color: #777; background: transparent; border: 0; border-radius: 8px; cursor: pointer;
+}
+#jf-sidebar .jf-data-trigger svg { width: 20px; height: 20px; }
+#jf-sidebar .jf-data-trigger:hover, #jf-sidebar .jf-data-trigger[aria-expanded="true"] { background: #eee; color: #333; }
+#jf-sidebar .jf-data-dropdown {
+  position: absolute; top: 34px; right: 0; z-index: 100; width: 260px; padding: 6px;
+  border: 1px solid #ededed; border-radius: 12px; background: #fff;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 10%); box-sizing: border-box;
+}
+#jf-sidebar .jf-data-dropdown[hidden] { display: none; }
+#jf-sidebar .jf-data-dropdown button {
+  display: flex; flex-direction: column; gap: 3px; width: 100%; padding: 10px 12px;
+  border: 0; border-radius: 7px; background: transparent; text-align: left; cursor: pointer;
+  color: var(--jf-text); font: 14px/20px var(--jf-font);
+}
+#jf-sidebar .jf-data-dropdown button:hover, #jf-sidebar .jf-data-dropdown button:focus-visible { background: #f5f7f5; outline: none; }
+#jf-sidebar .jf-data-dropdown small { color: #999; font-size: 11px; line-height: 16px; }
+#jf-sidebar .jf-data-dropdown .jf-menu-danger { color: #d9534f; border-top: 1px solid #f0f0f0; border-radius: 0 0 7px 7px; margin-top: 4px; }
+#jf-sidebar .jf-sync-summary { margin: -10px 2px 14px; font-size: 11px; line-height: 17px; color: var(--jf-text-2); }
+.jf-data-dialog {
+  box-sizing: border-box; width: min(440px, calc(100vw - 40px)); max-height: calc(100vh - 40px);
+  padding: 30px; border: 1px solid #eee; border-radius: 20px; background: #fff;
+  color: var(--jf-text); font: 14px/1.7 var(--jf-font); box-shadow: 0 20px 80px rgb(0 0 0 / 12%);
+}
+.jf-data-dialog::backdrop { background: rgb(30 37 32 / 26%); backdrop-filter: blur(3px); }
+.jf-data-dialog h2 { margin: 0 0 12px; font: 600 20px/1.4 var(--jf-font); color: #222; }
+.jf-data-dialog .jf-dialog-body { margin: 0; color: #777; white-space: pre-line; }
+.jf-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 26px; }
+.jf-dialog-actions button {
+  border: 0; border-radius: 8px; padding: 8px 16px; cursor: pointer;
+  background: #f0f0f0; color: #666; font: 14px/22px var(--jf-font);
+}
+.jf-dialog-actions button.jf-primary { color: white; background: var(--jf-green); }
+.jf-dialog-actions button.jf-danger { color: white; background: #d9534f; }
+.jf-dialog-actions button:disabled { opacity: .5; cursor: default; }
+.jf-dialog-actions button:focus-visible { outline: 2px solid var(--jf-green); outline-offset: 3px; }
+.jf-data-progress { text-align: center; }
+.jf-data-progress .jf-dialog-actions { justify-content: center; margin-top: 20px; }
+.jf-sync-spinner { width: 42px; height: 42px; margin: 2px auto 22px; border-radius: 50%; border: 3px solid #e3f5e9; border-top-color: var(--jf-green); animation: jf-sync-spin .9s linear infinite; }
+.jf-sync-track { height: 4px; margin-top: 26px; background: #edf7f0; border-radius: 3px; overflow: hidden; }
+.jf-sync-track span { display: block; width: 40%; height: 100%; border-radius: 3px; background: var(--jf-green); animation: jf-sync-slide 1.5s ease-in-out infinite alternate; }
+.jf-sync-detail { margin: 16px 0 0; min-height: 48px; white-space: pre-line; color: #555; font-size: 13px; }
+.jf-sync-hint { margin: 10px 0 0; color: #aaa; font-size: 11px; }
+.jf-data-toast { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 1000; max-width: calc(100vw - 48px); padding: 11px 20px; border-radius: 10px; background: rgb(45 50 46 / 94%); color: #fff; font: 13px/21px var(--jf-font); box-shadow: 0 4px 20px rgb(0 0 0 / 10%); }
+@keyframes jf-sync-spin { to { transform: rotate(360deg); } }
+@keyframes jf-sync-slide { from { transform: translateX(0); } to { transform: translateX(150%); } }
+@media (prefers-reduced-motion: reduce) {
+  .jf-sync-spinner, .jf-sync-track span { animation: none; }
+}
