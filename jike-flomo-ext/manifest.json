@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Jike → Flomo",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "把即刻网页版改造成 flomo 风格：左侧统计+热力图，右侧输入框+笔记流",
   "permissions": [
     "storage",

@@ -2,6 +2,7 @@
 # JF_TAB_ID=<target_id> browser-harness < tests/composer-images.py
 # Does not click Send or publish anything.
 import os
+import subprocess
 import time
 
 switch_tab(os.environ['JF_TAB_ID'])
@@ -64,7 +65,13 @@ paste(2)
 js('(async()=>{await window.JF_COMPOSER.flush();return true;})()')
 cdp('Page.reload')
 wait_for_load()
-time.sleep(.4)
+if os.environ.get('JF_TEST_HOT_RELOAD'):
+    subprocess.run([os.environ['JF_TEST_HOT_RELOAD']], check=True)
+for _ in range(100):
+    if js("document.querySelector('.jf-composer-input')?.contentEditable === 'true' && !!document.querySelector('[class*=_post_]')"):
+        break
+    time.sleep(.1)
+time.sleep(.3)
 s = state()
 assert s['images'] == 2 and s['inline'] == 0 and s['text'] == '图片草稿测试', s
 assert abs(s['gap'] - 10) < 1, s

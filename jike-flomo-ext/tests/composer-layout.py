@@ -1,6 +1,7 @@
 # Run with: JF_TAB_ID=<target_id> browser-harness < tests/composer-layout.py
 # Uses the existing logged-in tab; never submits a post.
 import os
+import subprocess
 import time
 
 if os.environ.get('JF_TAB_ID'):
@@ -45,6 +46,8 @@ for i in range(3):
     for route in ['/following', '/me']:
         click_selector(f'.jf-nav-item[data-route="{route}"]')
         time.sleep(1.2)
+        if os.environ.get('JF_TEST_HOT_RELOAD'):
+            subprocess.run([os.environ['JF_TEST_HOT_RELOAD']], check=True)
         check(f'路由切换 {i + 1} {route}')
 for expanded in [False, True]:
     if expanded:

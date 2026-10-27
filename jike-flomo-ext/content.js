@@ -385,6 +385,7 @@
     wrap.innerHTML = `
       <div id="jf-composer">
         <div class="jf-composer-input" contenteditable="true" role="textbox" aria-label="现在的想法" aria-multiline="true" data-placeholder="现在的想法是…"></div>
+        <div class="jf-topic-row" role="group" aria-label="圈子推荐与选择" hidden></div>
         <div class="jf-attachments" role="group" aria-label="待发送图片" hidden></div>
         <input class="jf-file-input" type="file" accept="image/*" multiple hidden>
         <div class="jf-composer-status" role="status" aria-live="polite" hidden></div>
@@ -425,7 +426,7 @@
   }
 
   // 图片交给即刻原生 Dropzone 上传，等待真实附件状态；复用原生按钮提交。
-  async function postToJike(text, files, message) {
+  async function postToJike(text, files, message, { editorState, topic } = {}) {
     const ed = $('[class*=_postForm] [data-lexical-editor]');
     if (!ed?.__lexicalEditor) {
       sessionStorage.setItem('jf-pending-send', '1');
@@ -437,10 +438,10 @@
     const fileInput = $('[class*=_postForm] input[type=file]');
     const formProps = () => fileInput && fiberData(fileInput, p => typeof p.getValues === 'function');
     const form = formProps();
-    const signature = JSON.stringify([text, files.map(f => [f.name, f.size, f.lastModified])]);
+    const signature = JSON.stringify([text, editorState, topic?.id, files.map(f => [f.name, f.size, f.lastModified])]);
     const values = form?.getValues();
     if (!ed.dataset.jfPrepared &&
-        (values?.content?.trim() || values?.attachment?.ids?.length)) {
+        (values?.content?.trim() || values?.attachment?.ids?.length || values?.topic)) {
       throw new Error('即刻原生编辑器已有草稿，请先处理原草稿后再发送');
     }
     if (files.length && !form) throw new Error('即刻图片上传入口尚未就绪，请稍后重试');
@@ -450,11 +451,14 @@
       direction: null, format: '', indent: 0, type: 'paragraph', version: 1, textFormat: 0, textStyle: ''
     }];
     const editor = ed.__lexicalEditor;
-    editor.setEditorState(editor.parseEditorState(JSON.stringify({
+    editor.setEditorState(editor.parseEditorState(JSON.stringify(editorState || {
       root: { children: paragraphs, direction: null, format: '', indent: 0, type: 'root', version: 1 }
     })));
     // 重试时清理本次准备的附件，避免重复添加。
-    if (form) form.setValue('attachment', { ids: [], map: {} });
+    if (form) {
+      form.setValue('attachment', { ids: [], map: {} });
+      form.setValue('topic', topic || undefined, { shouldDirty: true });
+    }
     if (files.length) {
       const drop = fiberData(fileInput, p => Array.isArray(p.accept) && typeof p.onDrop === 'function');
       if (!drop) throw new Error('即刻图片上传入口尚未就绪');

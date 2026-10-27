@@ -20,7 +20,7 @@ async function initialize(tabId) {
   await chrome.scripting.executeScript({
     target,
     world: 'MAIN',
-    files: ['db.js', 'composer.js', 'data-sync.js', 'content.js'],
+    files: ['db.js', 'native-services.js', 'composer-rich.js', 'composer.js', 'data-sync.js', 'content.js'],
   });
 }
 

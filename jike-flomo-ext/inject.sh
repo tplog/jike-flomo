@@ -6,6 +6,8 @@ import os
 css_src = open('styles/flomo.css').read()
 content_src = open('content.js').read()
 composer_src = open('composer.js').read()
+native_src = open('native-services.js').read()
+rich_src = open('composer-rich.js').read()
 sync_src = open('data-sync.js').read()
 db_src = open('db.js').read()
 
@@ -52,6 +54,8 @@ js("""
 
 # 重新注
 js(f"(() => {{ const s=document.createElement('style'); s.id='jf-test-css'; s.textContent={css_src!r}; document.head.appendChild(s); return 'css'; }})()")
+js(f"(() => {{ {native_src} ; return 'native services'; }})()")
+js(f"(() => {{ {rich_src} ; return 'rich composer'; }})()")
 js(f"(() => {{ {composer_src} ; return 'composer'; }})()")
 js(f"(() => {{ {sync_src} ; return 'data sync'; }})()")
 print(js(f"(() => {{ {content_src} ; return 'injected ✓'; }})()"))

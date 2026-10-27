@@ -32,7 +32,7 @@
     const images = $('.jf-attachments');
     const fileInput = $('.jf-file-input');
     const status = $('.jf-composer-status');
-    let busy = false, importing = 0, urls = [];
+    let busy = false, importing = 0, urls = [], rich = null;
     const dispose = () => {
       controller.abort();
       urls.forEach(url => URL.revokeObjectURL(url)); urls = [];
@@ -52,7 +52,8 @@
       send.disabled = busy || importing > 0 || (!draft.text.trim() && !draft.files.length);
       input.contentEditable = String(!busy);
       fileInput.disabled = busy;
-      box.querySelectorAll('.jf-image-remove, .jf-image-add, [data-k="img"]').forEach(el => { el.disabled = busy; });
+      box.querySelectorAll('.jf-image-remove, .jf-image-add, [data-k="img"], [data-k="at"], [data-k="tag"]').forEach(el => { el.disabled = busy; });
+      rich?.setDisabled(busy);
     };
     const renderImages = () => {
       if (signal.aborted || !box.isConnected) return;
@@ -95,17 +96,25 @@
       if (!text) return;
       input.focus();
       document.execCommand('insertText', false, text);
-      draft.text = input.innerText; update(); save();
+      syncInput();
     };
     input.contentEditable = 'false'; send.disabled = true;
     try { await ready; } catch { message('无法读取本地草稿'); }
     if (signal.aborted || !box.isConnected) return;
     input.textContent = draft.text;
+    const syncInput = () => {
+      Object.assign(draft, rich ? rich.read() : { text: input.innerText });
+      update(); save();
+    };
+    rich = window.JF_RICH.mount(box, { signal, getDraft: () => draft, change: syncInput });
     renderImages(); update();
-    on(input, 'input', () => { draft.text = input.innerText; update(); save(); });
+    on(input, 'input', syncInput);
     on(box, 'focusin', () => box.classList.add('jf-focus'));
     on(box, 'focusout', e => { if (!box.contains(e.relatedTarget)) box.classList.remove('jf-focus'); });
     on(box, 'click', e => { if (e.target === box) input.focus(); });
+    // 折叠状态下直接点按钮时，避免 mousedown 聚焦触发展开、按钮移位导致 click 丢失。
+    on(send, 'mousedown', e => e.preventDefault());
+    on($('[data-k="img"]'), 'mousedown', e => e.preventDefault());
     on($('[data-k="img"]'), 'click', () => fileInput.click());
     on(fileInput, 'change', () => { addImages([...fileInput.files]); fileInput.value = ''; });
     on(input, 'paste', e => {
@@ -144,10 +153,10 @@
       send.textContent = '…';
       try {
         await persist();
-        const result = await post(draft.text.trim(), [...draft.files], message);
+        const result = await post(draft.text.trim(), [...draft.files], message, { editorState: draft.editorState, topic: draft.topic });
         if (result === 'sent') {
           draft = { text: '', files: [] }; input.textContent = '';
-          renderImages(); await persist(); message('');
+          rich.reset(); renderImages(); await persist(); message('');
         }
       } catch (error) { message(error.message || '发送失败，草稿已保留'); }
       finally { busy = false; send.innerHTML = sendIcon; update(); }
